@@ -8,7 +8,7 @@ export interface Patient extends Models.Document {
   birthDate: Date;
   gender: Gender;
   address: string;
-  occupation: string;
+  occuptaion: string;
   emergencyContactName: string;
   emergencyContactNumber: string;
   primaryPhysician: string;
@@ -34,3 +34,5 @@ export interface Appointment extends Models.Document {
   userId: string;
   cancellationReason: string | null;
 }
+
+export type Status = "pending" | "scheduled" | "cancelled";

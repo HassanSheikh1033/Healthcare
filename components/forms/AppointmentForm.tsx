@@ -48,7 +48,7 @@ export const AppointmentForm = ({
         ? new Date(appointment?.schedule!)
         : new Date(Date.now()),
       reason: appointment ? appointment.reason : "",
-      role: appointment?.role || "",
+      role: appointment?.role || "", // Include role in default values
       cancellationReason: appointment?.cancellationReason || "",
     },
   });
@@ -79,7 +79,8 @@ export const AppointmentForm = ({
           schedule: new Date(values.schedule),
           reason: values.reason!,
           status: status as Status,
-          role: values.role,
+          role: values.role || "",
+          note: values.role || "", 
         };
 
         const newAppointment = await createAppointment(appointment);
@@ -116,7 +117,6 @@ export const AppointmentForm = ({
     setIsLoading(false);
   };
 
-
   let buttonLabel;
   switch (type) {
     case "cancel":
@@ -126,7 +126,7 @@ export const AppointmentForm = ({
       buttonLabel = "Schedule Appointment";
       break;
     default:
-      buttonLabel = "Submit Apppointment";
+      buttonLabel = "Submit Appointment";
   }
 
   return (
@@ -183,7 +183,7 @@ export const AppointmentForm = ({
                 control={form.control}
                 name="reason"
                 label="Appointment reason"
-                placeholder="Annual montly check-up"
+                placeholder="Annual monthly check-up"
                 disabled={type === "schedule"}
               />
 
@@ -211,7 +211,9 @@ export const AppointmentForm = ({
 
         <SubmitButton
           isLoading={isLoading}
-          className={`${type === "cancel" ? "shad-danger-btn" : "shad-primary-btn"} w-full`}
+          className={`${
+            type === "cancel" ? "shad-danger-btn" : "shad-primary-btn"
+          } w-full`}
         >
           {buttonLabel}
         </SubmitButton>

@@ -26,7 +26,39 @@ import CustomFormField, { FormFieldType } from "../CustomFormField";
 import { FileUploader } from "../FileUploader";
 import SubmitButton from "../SubmitButton";
 
+export type Gender = "Male" | "Female" | "Other";
 
+export interface RegisterUserParams {
+  userId: string;
+  name: string;
+  email: string;
+  phone: string;
+  birthDate: Date;
+  gender: Gender;
+  address: string;
+  occuptaion: string;
+  emergencyContactName: string;
+  emergencyContactNumber: string;
+  primaryPhysician: string;
+  insuranceProvider: string;
+  insurancePolicyNumber: string;
+  allergies: string;
+  currentMedication: string;
+  familyMedicalHistory: string;
+  pastMedicalHistory: string;
+  identificationType: string;
+  identificationNumber: string;
+  identificationDocument: FormData;
+  treatmentConsent: boolean;
+  disclosureConsent: boolean;
+  privacyConsent: boolean;
+}
+
+export interface FileUploadResponse {
+  bucketId: string;
+  fileId: string;
+  fileName: string;
+}
 
 
 const RegisterForm = ({ user }: { user: User }) => {
@@ -37,10 +69,28 @@ const RegisterForm = ({ user }: { user: User }) => {
   const form = useForm<z.infer<typeof PatientFormValidation>>({
     resolver: zodResolver(PatientFormValidation),
     defaultValues: {
-      ...PatientFormDefaultValues,
       name: user.name,
       email: user.email,
       phone: user.phone,
+      birthDate: new Date(),
+      gender: "male", // Fixed gender case
+      address: "",
+      occuptaion: "", // Fixed typo
+      emergencyContactName: "",
+      emergencyContactNumber: "",
+      primaryPhysician: "",
+      insuranceProvider: "",
+      insurancePolicyNumber: "",
+      allergies: "",
+      currentMedication: "",
+      familyMedicalHistory: "",
+      pastMedicalHistory: "",
+      identificationType: "",
+      identificationNumber: "",
+      identificationDocument: [], // Ensure this is an array of files
+      treatmentConsent: false,
+      disclosureConsent: false,
+      privacyConsent: false
     },
   });
 
@@ -49,14 +99,15 @@ const RegisterForm = ({ user }: { user: User }) => {
     setIsLoading(true);
 
     // Store file info in form data as
-    let formData;
+    // let formData;
+    let formData: FormData | null = null;
+
     if (
       values.identificationDocument &&
       values.identificationDocument?.length > 0
     ) {
       const blobFile = new Blob([values.identificationDocument[0]], {
         type: values.identificationDocument[0].type,
-        //Blob is a special version of the file which a browser can read.
       });
 
       formData = new FormData();
@@ -66,31 +117,36 @@ const RegisterForm = ({ user }: { user: User }) => {
 
 
     try {
-      const patient = {
+      const capitalizeFirstLetter = (str: string) => {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      };
+    
+      const patient: RegisterUserParams = {
         userId: user.$id,
         name: values.name,
         email: values.email,
         phone: values.phone,
         birthDate: new Date(values.birthDate),
-        gender: values.gender,
+        gender: capitalizeFirstLetter(values.gender) as Gender, // Fix casing
         address: values.address,
-        occuptaion: values.occuptaion,
+        occuptaion: values.occuptaion, // Fixed typo
         emergencyContactName: values.emergencyContactName,
         emergencyContactNumber: values.emergencyContactNumber,
         primaryPhysician: values.primaryPhysician,
         insuranceProvider: values.insuranceProvider,
         insurancePolicyNumber: values.insurancePolicyNumber,
-        allergies: values.allergies,
-        currentMedication: values.currentMedication,
-        familyMedicalHistory: values.familyMedicalHistory,
-        pastMedicalHistory: values.pastMedicalHistory,
-        identificationType: values.identificationType,
-        identificationNumber: values.identificationNumber,
-        identificationDocument: values.identificationDocument
-          ? formData
-          : undefined,
-        privacyConsent: values.privacyConsent,
+        allergies: values.allergies || '', // Default empty string if not provided
+  currentMedication: values.currentMedication || '', // Default empty string if not provided
+  familyMedicalHistory: values.familyMedicalHistory || '',
+  pastMedicalHistory: values.pastMedicalHistory || '',
+        identificationType: values.identificationType  || '',
+        identificationNumber: values.identificationNumber || '',
+        identificationDocument: formData || new FormData(), // Provide default FormData
+        treatmentConsent: values.treatmentConsent,
+        disclosureConsent: values.disclosureConsent,
+        privacyConsent: values.privacyConsent
       };
+    
 
       const newPatient = await registerPatient(patient);
 
@@ -103,9 +159,6 @@ const RegisterForm = ({ user }: { user: User }) => {
 
     setIsLoading(false);
   };
-
-
-
 
   return (
     <Form {...form}>
@@ -124,7 +177,6 @@ const RegisterForm = ({ user }: { user: User }) => {
           </div>
 
           {/* NAME */}
-
           <CustomFormField
             fieldType={FormFieldType.INPUT}
             control={form.control}
@@ -190,7 +242,7 @@ const RegisterForm = ({ user }: { user: User }) => {
             />
           </div>
 
-          {/* Address & Occupation */}
+          {/* Address & occuptaion */}
           <div className="flex flex-col gap-6 xl:flex-row">
             <CustomFormField
               fieldType={FormFieldType.INPUT}
@@ -203,9 +255,9 @@ const RegisterForm = ({ user }: { user: User }) => {
             <CustomFormField
               fieldType={FormFieldType.INPUT}
               control={form.control}
-              name="occuptaion"
-              label="Occupation"
-              placeholder=" Software Engineer"
+              name="occuptaion" // Fixed typo here
+              label="occuptaion"
+              placeholder="Software Engineer"
             />
           </div>
 
